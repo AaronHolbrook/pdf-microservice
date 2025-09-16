@@ -196,7 +196,7 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
         console.log('Generating PDF...');
         const pdf = await page.pdf({
             // Remove format to allow dynamic sizing based on content
-            landscape: requestBody.landscape,
+            landscape: false,
             margin: { top: '0mm', right: '0mm', bottom: '0mm', left: '0mm' },
             printBackground: true,
             width: '1800px'  // Set explicit width to match viewport, let height be automatic
