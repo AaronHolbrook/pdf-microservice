@@ -5,17 +5,40 @@ const puppeteer = require('puppeteer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// API Key from environment variable (required)
+const API_KEY = process.env.API_KEY;
+
+if (!API_KEY) {
+    console.error('ERROR: API_KEY environment variable is required');
+    process.exit(1);
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Health check endpoint
+// Authentication middleware
+const requireApiKey = (req, res, next) => {
+    const apiKey = req.headers['x-api-key'] || req.query.api_key;
+
+    if (!apiKey) {
+        return res.status(401).json({ error: 'API key required' });
+    }
+
+    if (apiKey !== API_KEY) {
+        return res.status(401).json({ error: 'Invalid API key' });
+    }
+
+    next();
+};
+
+// Health check endpoint (no auth required)
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'pdf-microservice' });
 });
 
-// Main PDF generation endpoint
-app.post('/generate-pdf', async (req, res) => {
+// Main PDF generation endpoint (auth required)
+app.post('/generate-pdf', requireApiKey, async (req, res) => {
     try {
         const {
             url,
@@ -98,8 +121,8 @@ app.post('/generate-pdf', async (req, res) => {
     }
 });
 
-// GET endpoint for simple URL-based generation
-app.get('/generate-pdf', async (req, res) => {
+// GET endpoint for simple URL-based generation (auth required)
+app.get('/generate-pdf', requireApiKey, async (req, res) => {
     const { url, format, landscape } = req.query;
 
     if (!url) {
