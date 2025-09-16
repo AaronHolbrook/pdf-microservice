@@ -1,0 +1,21 @@
+{
+    "name": "pdf-microservice",
+    "version": "1.0.0",
+    "description": "Simple PDF generation microservice using Puppeteer",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "nodemon server.js"
+    },
+    "dependencies": {
+        "puppeteer": "^21.0.0",
+        "express": "^4.18.0",
+        "cors": "^2.8.5"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
