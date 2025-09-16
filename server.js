@@ -199,8 +199,7 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
             landscape: requestBody.landscape,
             margin: { top: '0mm', right: '0mm', bottom: '0mm', left: '0mm' },
             printBackground: true,
-            width: '1800px',  // Set explicit width to match viewport
-            height: 'auto'    // Let height adjust to content
+            width: '1800px'  // Set explicit width to match viewport, let height be automatic
         });
         console.log(`PDF generated, size: ${pdf.length} bytes`);
 
