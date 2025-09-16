@@ -43,7 +43,9 @@ app.get('/debug', (req, res) => {
         hasApiKey: !!process.env.API_KEY,
         apiKeyLength: process.env.API_KEY ? process.env.API_KEY.length : 0,
         headers: req.headers['x-api-key'] ? 'header present' : 'no header',
-        query: req.query.api_key ? 'query present' : 'no query'
+        query: req.query.api_key ? 'query present' : 'no query',
+        viewportWidth: 1800,
+        margins: 'removed'
     });
 });
 
@@ -193,10 +195,12 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
         // Generate PDF
         console.log('Generating PDF...');
         const pdf = await page.pdf({
-            format: requestBody.format,
+            // Remove format to allow dynamic sizing based on content
             landscape: requestBody.landscape,
             margin: { top: '0mm', right: '0mm', bottom: '0mm', left: '0mm' },
-            printBackground: true
+            printBackground: true,
+            width: '1800px',  // Set explicit width to match viewport
+            height: 'auto'    // Let height adjust to content
         });
         console.log(`PDF generated, size: ${pdf.length} bytes`);
 
