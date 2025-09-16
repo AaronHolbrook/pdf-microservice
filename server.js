@@ -30,6 +30,8 @@ app.post('/generate-pdf', async (req, res) => {
             return res.status(400).json({ error: 'URL is required' });
         }
 
+        console.log('Attempting to launch browser...');
+
         // Launch browser
         const browser = await puppeteer.launch({
             headless: true,
@@ -46,40 +48,52 @@ app.post('/generate-pdf', async (req, res) => {
             ]
         });
 
+        console.log('Browser launched successfully');
+
         const page = await browser.newPage();
+        console.log('New page created');
 
         // Set viewport
         await page.setViewport({ width: 1200, height: 800 });
+        console.log('Viewport set');
 
         // Navigate to URL
+        console.log(`Navigating to: ${url}`);
         await page.goto(url, {
             waitUntil: waitUntil,
             timeout: timeout
         });
+        console.log('Page loaded successfully');
 
         // Generate PDF
+        console.log('Generating PDF...');
         const pdf = await page.pdf({
             format: format,
             landscape: landscape,
             margin: margin,
             printBackground: true
         });
+        console.log(`PDF generated, size: ${pdf.length} bytes`);
 
         await browser.close();
+        console.log('Browser closed');
 
         // Set response headers
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename="document.pdf"');
         res.setHeader('Content-Length', pdf.length);
 
-        // Send PDF
-        res.send(pdf);
+        // Send PDF buffer as binary data
+        res.write(pdf, 'binary');
+        res.end();
 
     } catch (error) {
         console.error('PDF generation error:', error);
+        console.error('Error stack:', error.stack);
         res.status(500).json({
             error: 'Failed to generate PDF',
-            message: error.message
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 });
