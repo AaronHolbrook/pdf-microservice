@@ -89,8 +89,8 @@ app.post('/generate-pdf', requireApiKey, async (req, res) => {
         console.log('New page created');
 
         // Set viewport
-        await page.setViewport({ width: 1400, height: 900 });
-        console.log('Viewport set to 1400x900');
+        await page.setViewport({ width: 1000, height: 900 });
+        console.log('Viewport set to 1000x900');
 
         // Navigate to URL
         console.log(`Navigating to: ${url}`);
@@ -181,8 +181,8 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
         console.log('New page created');
 
         // Set viewport
-        await page.setViewport({ width: 1400, height: 900 });
-        console.log('Viewport set to 1400x900');
+        await page.setViewport({ width: 1000, height: 900 });
+        console.log('Viewport set to 1000x900');
 
         // Navigate to URL
         console.log(`Navigating to: ${url}`);
@@ -198,7 +198,7 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
             landscape: false,
             margin: { top: '2mm', right: '2mm', bottom: '2mm', left: '2mm' },
             printBackground: true,
-            width: '1400px'
+            width: '1000px'
         });
         console.log(`PDF generated, size: ${pdf.length} bytes`);
 
