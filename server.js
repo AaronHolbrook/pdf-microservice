@@ -37,6 +37,16 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'pdf-microservice' });
 });
 
+// Debug endpoint to check environment (temporary - remove in production)
+app.get('/debug', (req, res) => {
+    res.json({
+        hasApiKey: !!process.env.API_KEY,
+        apiKeyLength: process.env.API_KEY ? process.env.API_KEY.length : 0,
+        headers: req.headers['x-api-key'] ? 'header present' : 'no header',
+        query: req.query.api_key ? 'query present' : 'no query'
+    });
+});
+
 // Main PDF generation endpoint (auth required)
 app.post('/generate-pdf', requireApiKey, async (req, res) => {
     try {
@@ -129,15 +139,80 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
         return res.status(400).json({ error: 'URL parameter is required' });
     }
 
-    // Forward to POST endpoint
-    req.body = {
+    // Create request body object for consistency with POST handler
+    const requestBody = {
         url,
         format: format || 'A4',
         landscape: landscape === 'true'
     };
 
-    // Call the POST handler
-    return app._router.handle({ method: 'POST', url: '/generate-pdf', body: req.body }, res);
+    try {
+        console.log('Attempting to launch browser...');
+
+        // Launch browser
+        const browser = await puppeteer.launch({
+            headless: true,
+            executablePath: '/usr/bin/chromium',
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process',
+                '--disable-gpu'
+            ]
+        });
+
+        console.log('Browser launched successfully');
+
+        const page = await browser.newPage();
+        console.log('New page created');
+
+        // Set viewport
+        await page.setViewport({ width: 1200, height: 800 });
+        console.log('Viewport set');
+
+        // Navigate to URL
+        console.log(`Navigating to: ${url}`);
+        await page.goto(url, {
+            waitUntil: 'networkidle0',
+            timeout: 30000
+        });
+        console.log('Page loaded successfully');
+
+        // Generate PDF
+        console.log('Generating PDF...');
+        const pdf = await page.pdf({
+            format: requestBody.format,
+            landscape: requestBody.landscape,
+            margin: { top: '12mm', right: '12mm', bottom: '12mm', left: '12mm' },
+            printBackground: true
+        });
+        console.log(`PDF generated, size: ${pdf.length} bytes`);
+
+        await browser.close();
+        console.log('Browser closed');
+
+        // Set response headers
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="document.pdf"');
+        res.setHeader('Content-Length', pdf.length);
+
+        // Send PDF buffer as binary data
+        res.write(pdf, 'binary');
+        res.end();
+
+    } catch (error) {
+        console.error('PDF generation error:', error);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({
+            error: 'Failed to generate PDF',
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
 });
 
 app.listen(PORT, '0.0.0.0', () => {
