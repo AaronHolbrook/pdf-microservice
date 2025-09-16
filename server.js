@@ -89,8 +89,8 @@ app.post('/generate-pdf', requireApiKey, async (req, res) => {
         console.log('New page created');
 
         // Set viewport
-        await page.setViewport({ width: 1800, height: 900 });
-        console.log('Viewport set to 1800x900');
+        await page.setViewport({ width: 1400, height: 900 });
+        console.log('Viewport set to 1400x900');
 
         // Navigate to URL
         console.log(`Navigating to: ${url}`);
@@ -181,8 +181,8 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
         console.log('New page created');
 
         // Set viewport
-        await page.setViewport({ width: 1800, height: 900 });
-        console.log('Viewport set to 1800x900');
+        await page.setViewport({ width: 1400, height: 900 });
+        console.log('Viewport set to 1400x900');
 
         // Navigate to URL
         console.log(`Navigating to: ${url}`);
@@ -195,11 +195,10 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
         // Generate PDF
         console.log('Generating PDF...');
         const pdf = await page.pdf({
-            // Remove format to allow dynamic sizing based on content
             landscape: false,
-            margin: { top: '0mm', right: '0mm', bottom: '0mm', left: '0mm' },
+            margin: { top: '2mm', right: '2mm', bottom: '2mm', left: '2mm' },
             printBackground: true,
-            width: '1800px'  // Set explicit width to match viewport, let height be automatic
+            width: '1400px'
         });
         console.log(`PDF generated, size: ${pdf.length} bytes`);
 
