@@ -87,8 +87,8 @@ app.post('/generate-pdf', requireApiKey, async (req, res) => {
         console.log('New page created');
 
         // Set viewport
-        await page.setViewport({ width: 1200, height: 800 });
-        console.log('Viewport set');
+        await page.setViewport({ width: 1400, height: 900 });
+        console.log('Viewport set to 1400x900');
 
         // Navigate to URL
         console.log(`Navigating to: ${url}`);
@@ -133,7 +133,13 @@ app.post('/generate-pdf', requireApiKey, async (req, res) => {
 
 // GET endpoint for simple URL-based generation (auth required)
 app.get('/generate-pdf', requireApiKey, async (req, res) => {
-    const { url, format, landscape } = req.query;
+    const {
+        url,
+        format,
+        landscape,
+        viewport_width,
+        viewport_height
+    } = req.query;
 
     if (!url) {
         return res.status(400).json({ error: 'URL parameter is required' });
@@ -143,7 +149,9 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
     const requestBody = {
         url,
         format: format || 'A4',
-        landscape: landscape === 'true'
+        landscape: landscape === 'true',
+        viewport_width: parseInt(viewport_width) || 1440,
+        viewport_height: parseInt(viewport_height) || 900
     };
 
     try {
@@ -171,8 +179,8 @@ app.get('/generate-pdf', requireApiKey, async (req, res) => {
         console.log('New page created');
 
         // Set viewport
-        await page.setViewport({ width: 1200, height: 800 });
-        console.log('Viewport set');
+        await page.setViewport({ width: 1400, height: 900 });
+        console.log('Viewport set to 1400x900');
 
         // Navigate to URL
         console.log(`Navigating to: ${url}`);
